@@ -64,9 +64,49 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/myToys/:email", async (req, res) => {
-      const query = { seller_email: req.params.email };
+    app.get("/allToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/myToys", async (req, res) => {
+      console.log(req.query);
+      let query = {};
+      if (req.query?.email) {
+        query = { seller_email: req.query.email };
+      }
       const result = await toysCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/myToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/myToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const toy = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatePost = {
+        $set: {
+          name: toy.name,
+          img: toy.img,
+          price: toy.price,
+          quantity: toy.quantity,
+          details: toy.details,
+        },
+      };
+      const result = await toysCollection.updateOne(
+        filter,
+        updatePost,
+        options
+      );
       res.send(result);
     });
 
