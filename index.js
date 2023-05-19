@@ -41,7 +41,7 @@ async function run() {
 
     app.post("/toys", async (req, res) => {
       const toy = req.body;
-      console.log(toy);
+      console.log(req.body.price);
       const result = await toysCollection.insertOne(toy);
       res.send(result);
     });
@@ -71,6 +71,34 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/myToys", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { seller_email: req.query.email };
+      }
+
+      console.log(req.query.sort);
+      let sortOrder;
+      if (req.query?.sort === "highest") {
+        sortOrder = -1;
+      } else if (req.query?.sort === "lowest") {
+        sortOrder = 1;
+      }
+
+      const result = await toysCollection
+        .find(query)
+        .sort({ price: sortOrder })
+        .toArray();
+      res.send(result);
+    });
+
+    app.get("/myToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    });
+
     app.put("/myToys/:id", async (req, res) => {
       const id = req.params.id;
       const toy = req.body;
@@ -90,34 +118,6 @@ async function run() {
         updatePost,
         options
       );
-      res.send(result);
-    });
-
-    app.get("/myToys", async (req, res) => {
-      let query = {};
-      if (req.query?.email) {
-        query = { seller_email: req.query.email };
-      }
-
-      console.log(req.query.sort);
-      let sortOrder = 1;
-      if (req.query?.sort === "highest") {
-        sortOrder = 1;
-      } else if (req.query?.sort === "lowest") {
-        sortOrder = -1;
-      }
-
-      const result = await toysCollection
-        .find(query)
-        .sort({ price: sortOrder })
-        .toArray();
-      res.send(result);
-    });
-
-    app.get("/myToys/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await toysCollection.findOne(query);
       res.send(result);
     });
 
