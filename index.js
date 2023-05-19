@@ -71,23 +71,6 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/myToys", async (req, res) => {
-      console.log(req.query);
-      let query = {};
-      if (req.query?.email) {
-        query = { seller_email: req.query.email };
-      }
-      const result = await toysCollection.find(query).toArray();
-      res.send(result);
-    });
-
-    app.get("/myToys/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await toysCollection.findOne(query);
-      res.send(result);
-    });
-
     app.put("/myToys/:id", async (req, res) => {
       const id = req.params.id;
       const toy = req.body;
@@ -110,7 +93,35 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/allToys/:id", async (req, res) => {
+    app.get("/myToys", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { seller_email: req.query.email };
+      }
+
+      console.log(req.query.sort);
+      let sortOrder = 1;
+      if (req.query?.sort === "highest") {
+        sortOrder = 1;
+      } else if (req.query?.sort === "lowest") {
+        sortOrder = -1;
+      }
+
+      const result = await toysCollection
+        .find(query)
+        .sort({ price: sortOrder })
+        .toArray();
+      res.send(result);
+    });
+
+    app.get("/myToys/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.delete("/myToys/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await toysCollection.deleteOne(query);
